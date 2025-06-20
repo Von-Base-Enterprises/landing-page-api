@@ -35,13 +35,47 @@ app.get('/health', (req, res) => {
 
 // API Routes
 
+// Dashboard route
+app.get('/dashboard', (req, res) => {
+  try {
+    const fs = require('fs');
+    const dashboardHtml = fs.readFileSync(path.join(__dirname, 'dashboard.html'), 'utf8');
+    res.setHeader('Content-Type', 'text/html');
+    res.send(dashboardHtml);
+  } catch (error) {
+    console.error('Error serving dashboard:', error);
+    res.status(500).json({ 
+      success: false, 
+      error: 'Failed to load dashboard' 
+    });
+  }
+});
+
+// List all apps - add missing endpoint
+app.get('/api/apps', (req, res) => {
+  const appList = Array.from(apps.values()).map(app => ({
+    id: app.id,
+    title: app.title,
+    createdAt: app.createdAt,
+    views: app.views,
+    miniPaasType: app.miniPaasType || 'custom'
+  }));
+
+  res.json({
+    success: true,
+    apps: appList,
+    total: appList.length
+  });
+});
+
 // Deploy a full application
 app.post('/api/apps', async (req, res) => {
   try {
     const {
       title = 'My App',
       files = {},
-      mainFile = 'index.html'
+      mainFile = 'index.html',
+      miniPaasType = 'custom'
     } = req.body;
 
     const appId = uuidv4();
@@ -50,6 +84,7 @@ app.post('/api/apps', async (req, res) => {
       title,
       files,
       mainFile,
+      miniPaasType,
       createdAt: new Date().toISOString(),
       views: 0
     };
@@ -297,16 +332,19 @@ app.get('/api/pages', (req, res) => {
 // Default route
 app.get('/', (req, res) => {
   res.json({
-    message: 'Landing Page API',
+    message: 'Landing Page API + Mini-PaaS',
     endpoints: {
+      'GET /dashboard': 'Mini-PaaS Dashboard',
       'POST /api/pages': 'Create a new landing page',
       'GET /api/pages': 'List all pages',
       'GET /api/pages/:pageId': 'Get page info',
-      'GET /api/apps': 'Deploy full application',
+      'POST /api/apps': 'Deploy full application',
+      'GET /api/apps': 'List all apps',
       'GET /app/:appId': 'View deployed app',
       'GET /:pageId': 'View landing page'
     },
-    docs: 'See README.md for detailed usage'
+    docs: 'See README.md for detailed usage',
+    dashboard: `${req.protocol}://${req.get('host')}/dashboard`
   });
 });
 

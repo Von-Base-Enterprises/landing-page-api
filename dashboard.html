@@ -1,0 +1,668 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mini-PaaS Dashboard</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+        
+        .header {
+            text-align: center;
+            color: white;
+            margin-bottom: 3rem;
+        }
+        
+        .header h1 {
+            font-size: 3rem;
+            margin-bottom: 0.5rem;
+            font-weight: 700;
+        }
+        
+        .header p {
+            font-size: 1.2rem;
+            opacity: 0.9;
+        }
+        
+        .dashboard {
+            background: white;
+            border-radius: 20px;
+            padding: 2rem;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            margin-bottom: 2rem;
+        }
+        
+        .create-section {
+            text-align: center;
+            padding: 2rem;
+            border: 2px dashed #ddd;
+            border-radius: 15px;
+            margin-bottom: 3rem;
+        }
+        
+        .create-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 1rem 2rem;
+            font-size: 1.1rem;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+            margin: 0.5rem;
+        }
+        
+        .create-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6);
+        }
+        
+        .create-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+        
+        .apps-section h2 {
+            margin-bottom: 1.5rem;
+            color: #333;
+            border-bottom: 2px solid #eee;
+            padding-bottom: 0.5rem;
+        }
+        
+        .apps-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 1.5rem;
+        }
+        
+        .app-card {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 1.5rem;
+            border: 1px solid #eee;
+            transition: all 0.3s ease;
+        }
+        
+        .app-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+        }
+        
+        .app-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            color: #333;
+        }
+        
+        .app-id {
+            font-size: 0.9rem;
+            color: #666;
+            margin-bottom: 1rem;
+            font-family: monospace;
+        }
+        
+        .app-actions {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+        }
+        
+        .open-btn {
+            background: #28a745;
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+        }
+        
+        .open-btn:hover {
+            background: #218838;
+            text-decoration: none;
+            color: white;
+        }
+        
+        .delete-btn {
+            background: #dc3545;
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
+        }
+        
+        .delete-btn:hover {
+            background: #c82333;
+        }
+        
+        .empty-state {
+            text-align: center;
+            padding: 3rem 1rem;
+            color: #666;
+        }
+        
+        .empty-state h3 {
+            margin-bottom: 1rem;
+            color: #888;
+        }
+        
+        .loading {
+            display: inline-block;
+            margin-left: 0.5rem;
+        }
+        
+        .spinner {
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            border: 2px solid #ffffff;
+            border-radius: 50%;
+            border-top-color: transparent;
+            animation: spin 1s ease-in-out infinite;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        .success-message {
+            background: #d4edda;
+            color: #155724;
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+            border: 1px solid #c3e6cb;
+        }
+        
+        .error-message {
+            background: #f8d7da;
+            color: #721c24;
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+            border: 1px solid #f5c6cb;
+        }
+        
+        @media (max-width: 768px) {
+            .container {
+                padding: 1rem;
+            }
+            
+            .header h1 {
+                font-size: 2rem;
+            }
+            
+            .dashboard {
+                padding: 1.5rem;
+            }
+            
+            .apps-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+        
+        .stat-card {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 1.5rem;
+            text-align: center;
+            border: 1px solid #eee;
+        }
+        
+        .stat-number {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #667eea;
+        }
+        
+        .stat-label {
+            color: #666;
+            font-size: 0.9rem;
+            margin-top: 0.5rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🚀 Mini-PaaS Dashboard</h1>
+            <p>Create and manage your lightweight applications</p>
+        </div>
+        
+        <div class="dashboard">
+            <div class="stats">
+                <div class="stat-card">
+                    <div class="stat-number" id="totalApps">0</div>
+                    <div class="stat-label">Total Apps</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="totalPages">0</div>
+                    <div class="stat-label">Landing Pages</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="totalViews">0</div>
+                    <div class="stat-label">Total Views</div>
+                </div>
+            </div>
+            
+            <div class="create-section">
+                <h2>🎯 Quick Deploy</h2>
+                <p style="margin-bottom: 1.5rem; color: #666;">Create applications instantly</p>
+                <button class="create-btn" onclick="createTodoApp()">
+                    📝 Create Todo App
+                    <span class="loading" id="createTodoLoading" style="display: none;">
+                        <span class="spinner"></span>
+                    </span>
+                </button>
+                <button class="create-btn" onclick="createCalculatorApp()">
+                    🧮 Create Calculator
+                    <span class="loading" id="createCalcLoading" style="display: none;">
+                        <span class="spinner"></span>
+                    </span>
+                </button>
+            </div>
+            
+            <div id="messages"></div>
+            
+            <div class="apps-section">
+                <h2>📱 Your Applications</h2>
+                <div class="apps-grid" id="appsGrid">
+                    <div class="empty-state">
+                        <h3>No apps yet</h3>
+                        <p>Create your first app to get started!</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // State management
+        let apps = [];
+        let pages = [];
+        
+        // Initialize dashboard
+        document.addEventListener('DOMContentLoaded', function() {
+            loadData();
+        });
+        
+        // Load all data
+        async function loadData() {
+            await Promise.all([loadApps(), loadPages()]);
+            updateStats();
+        }
+        
+        // Create a new todo app
+        async function createTodoApp() {
+            await createApp('todo', 'createTodoLoading');
+        }
+        
+        // Create a new calculator app
+        async function createCalculatorApp() {
+            await createApp('calculator', 'createCalcLoading');
+        }
+        
+        // Generic app creation
+        async function createApp(type, loadingId) {
+            const loading = document.getElementById(loadingId);
+            const createBtn = event.target;
+            
+            // Show loading state
+            createBtn.disabled = true;
+            loading.style.display = 'inline-block';
+            
+            try {
+                const appNames = {
+                    todo: `Todo App ${new Date().toLocaleTimeString()}`,
+                    calculator: `Calculator ${new Date().toLocaleTimeString()}`
+                };
+                
+                // Use existing API with enhanced data for mini-PaaS
+                const response = await fetch('/api/apps', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        title: appNames[type],
+                        files: getAppFiles(type),
+                        mainFile: 'index.html',
+                        miniPaasType: type // Add type info for dashboard
+                    })
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    showMessage(`✅ ${appNames[type]} created successfully!`, 'success');
+                    loadData(); // Refresh data
+                } else {
+                    showMessage(`❌ Failed to create app: ${result.error}`, 'error');
+                }
+                
+            } catch (error) {
+                console.error('Error creating app:', error);
+                showMessage(`❌ Network error: ${error.message}`, 'error');
+            } finally {
+                // Hide loading state
+                createBtn.disabled = false;
+                loading.style.display = 'none';
+            }
+        }
+        
+        // Get app files based on type
+        function getAppFiles(type) {
+            const todoFiles = {
+                'index.html': getTodoAppHTML()
+            };
+            
+            const calculatorFiles = {
+                'index.html': getCalculatorAppHTML()
+            };
+            
+            return type === 'todo' ? todoFiles : calculatorFiles;
+        }
+        
+        // Load apps from API
+        async function loadApps() {
+            try {
+                // Get existing apps
+                const response = await fetch('/api/apps');
+                if (response.status === 404) {
+                    // Endpoint doesn't exist yet in current API
+                    apps = [];
+                    return;
+                }
+                
+                const result = await response.json();
+                if (result.success) {
+                    apps = result.apps || [];
+                }
+            } catch (error) {
+                console.error('Error loading apps:', error);
+                apps = [];
+            }
+        }
+        
+        // Load pages from API
+        async function loadPages() {
+            try {
+                const response = await fetch('/api/pages');
+                const result = await response.json();
+                
+                if (result.success) {
+                    pages = result.pages || [];
+                }
+            } catch (error) {
+                console.error('Error loading pages:', error);
+                pages = [];
+            }
+        }
+        
+        // Render apps grid
+        function renderApps() {
+            const appsGrid = document.getElementById('appsGrid');
+            
+            if (apps.length === 0) {
+                appsGrid.innerHTML = `
+                    <div class="empty-state">
+                        <h3>No apps yet</h3>
+                        <p>Create your first app to get started!</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            appsGrid.innerHTML = apps.map(app => `
+                <div class="app-card">
+                    <div class="app-title">${escapeHtml(app.title)}</div>
+                    <div class="app-id">ID: ${app.id}</div>
+                    <div style="font-size: 0.9rem; color: #666; margin-bottom: 1rem;">
+                        Type: ${app.miniPaasType || 'custom'} • Views: ${app.views || 0} • Created: ${new Date(app.createdAt).toLocaleDateString()}
+                    </div>
+                    <div class="app-actions">
+                        <a href="/app/${app.id}" class="open-btn" target="_blank">
+                            🚀 Open App
+                        </a>
+                        <button class="delete-btn" onclick="deleteApp('${app.id}')">
+                            🗑️ Delete
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+        }
+        
+        // Update statistics
+        function updateStats() {
+            document.getElementById('totalApps').textContent = apps.length;
+            document.getElementById('totalPages').textContent = pages.length;
+            
+            const totalViews = [...apps, ...pages].reduce((sum, item) => sum + (item.views || 0), 0);
+            document.getElementById('totalViews').textContent = totalViews;
+            
+            renderApps();
+        }
+        
+        // Delete an app (placeholder - would need API endpoint)
+        async function deleteApp(appId) {
+            if (!confirm('Are you sure you want to delete this app?')) {
+                return;
+            }
+            
+            showMessage('⚠️ Delete functionality would be implemented with API endpoint', 'error');
+        }
+        
+        // Show success/error messages
+        function showMessage(message, type) {
+            const messagesDiv = document.getElementById('messages');
+            const messageClass = type === 'success' ? 'success-message' : 'error-message';
+            
+            messagesDiv.innerHTML = `<div class="${messageClass}">${message}</div>`;
+            
+            // Auto-hide after 5 seconds
+            setTimeout(() => {
+                messagesDiv.innerHTML = '';
+            }, 5000);
+        }
+        
+        // Escape HTML to prevent XSS
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+        
+        // Get Todo App HTML
+        function getTodoAppHTML() {
+            return \`<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Todo App</title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 2rem; }
+        .todo-input { width: 70%; padding: 0.5rem; margin-right: 0.5rem; }
+        .add-btn { padding: 0.5rem 1rem; background: #007bff; color: white; border: none; cursor: pointer; }
+        .todo-item { padding: 0.5rem; margin: 0.5rem 0; background: #f5f5f5; border-radius: 4px; }
+        .todo-item.done { text-decoration: line-through; opacity: 0.6; }
+        h1 { color: #333; text-align: center; }
+    </style>
+</head>
+<body>
+    <h1>📝 My Todo App</h1>
+    <div>
+        <input type="text" id="todoInput" class="todo-input" placeholder="Add a new task...">
+        <button onclick="addTodo()" class="add-btn">Add</button>
+    </div>
+    <div id="todoList"></div>
+    
+    <script>
+        let todos = JSON.parse(localStorage.getItem('todos') || '[]');
+        
+        function renderTodos() {
+            const list = document.getElementById('todoList');
+            list.innerHTML = todos.map((todo, index) => \\\`
+                <div class="todo-item \\\${todo.done ? 'done' : ''}">
+                    <input type="checkbox" \\\${todo.done ? 'checked' : ''} onchange="toggleTodo(\\\${index})">
+                    \\\${todo.text}
+                    <button onclick="deleteTodo(\\\${index})" style="float: right; background: #dc3545; color: white; border: none; padding: 0.25rem 0.5rem;">Delete</button>
+                </div>
+            \\\`).join('');
+        }
+        
+        function addTodo() {
+            const input = document.getElementById('todoInput');
+            if (input.value.trim()) {
+                todos.push({ text: input.value.trim(), done: false });
+                input.value = '';
+                saveTodos();
+                renderTodos();
+            }
+        }
+        
+        function toggleTodo(index) {
+            todos[index].done = !todos[index].done;
+            saveTodos();
+            renderTodos();
+        }
+        
+        function deleteTodo(index) {
+            todos.splice(index, 1);
+            saveTodos();
+            renderTodos();
+        }
+        
+        function saveTodos() {
+            localStorage.setItem('todos', JSON.stringify(todos));
+        }
+        
+        document.getElementById('todoInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') addTodo();
+        });
+        
+        renderTodos();
+    </script>
+</body>
+</html>\`;
+        }
+        
+        // Get Calculator App HTML
+        function getCalculatorAppHTML() {
+            return \`<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calculator App</title>
+    <style>
+        body { font-family: Arial, sans-serif; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; background: #f0f0f0; }
+        .calculator { background: white; border-radius: 10px; padding: 20px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        .display { width: 100%; height: 60px; font-size: 24px; text-align: right; margin-bottom: 10px; padding: 0 10px; border: 1px solid #ddd; }
+        .buttons { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
+        button { height: 50px; font-size: 18px; border: none; border-radius: 5px; cursor: pointer; }
+        .number { background: #e9ecef; }
+        .operator { background: #007bff; color: white; }
+        .equals { background: #28a745; color: white; }
+        .clear { background: #dc3545; color: white; }
+        h1 { text-align: center; margin-bottom: 20px; color: #333; }
+    </style>
+</head>
+<body>
+    <div class="calculator">
+        <h1>🧮 Calculator</h1>
+        <input type="text" id="display" class="display" readonly>
+        <div class="buttons">
+            <button onclick="clearDisplay()" class="clear">C</button>
+            <button onclick="appendToDisplay('/')" class="operator">÷</button>
+            <button onclick="appendToDisplay('*')" class="operator">×</button>
+            <button onclick="deleteLast()" class="operator">⌫</button>
+            <button onclick="appendToDisplay('7')" class="number">7</button>
+            <button onclick="appendToDisplay('8')" class="number">8</button>
+            <button onclick="appendToDisplay('9')" class="number">9</button>
+            <button onclick="appendToDisplay('-')" class="operator">-</button>
+            <button onclick="appendToDisplay('4')" class="number">4</button>
+            <button onclick="appendToDisplay('5')" class="number">5</button>
+            <button onclick="appendToDisplay('6')" class="number">6</button>
+            <button onclick="appendToDisplay('+')" class="operator">+</button>
+            <button onclick="appendToDisplay('1')" class="number">1</button>
+            <button onclick="appendToDisplay('2')" class="number">2</button>
+            <button onclick="appendToDisplay('3')" class="number">3</button>
+            <button onclick="calculate()" class="equals" rowspan="2">=</button>
+            <button onclick="appendToDisplay('0')" class="number" style="grid-column: span 2;">0</button>
+            <button onclick="appendToDisplay('.')" class="number">.</button>
+        </div>
+    </div>
+    
+    <script>
+        function appendToDisplay(value) {
+            const display = document.getElementById('display');
+            if (display.value === '0' && value !== '.') {
+                display.value = value;
+            } else {
+                display.value += value;
+            }
+        }
+        
+        function clearDisplay() {
+            document.getElementById('display').value = '0';
+        }
+        
+        function deleteLast() {
+            const display = document.getElementById('display');
+            display.value = display.value.slice(0, -1) || '0';
+        }
+        
+        function calculate() {
+            const display = document.getElementById('display');
+            try {
+                // Replace display symbols with JavaScript operators
+                let expression = display.value.replace(/×/g, '*').replace(/÷/g, '/');
+                display.value = eval(expression);
+            } catch (error) {
+                display.value = 'Error';
+                setTimeout(() => clearDisplay(), 1500);
+            }
+        }
+        
+        // Initialize display
+        clearDisplay();
+    </script>
+</body>
+</html>\`;
+        }
+    </script>
+</body>
+</html>
