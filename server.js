@@ -293,7 +293,24 @@ app.get('/api/pages', (req, res) => {
   });
 });
 
-// Serve landing pages
+
+// Default route
+app.get('/', (req, res) => {
+  res.json({
+    message: 'Landing Page API',
+    endpoints: {
+      'POST /api/pages': 'Create a new landing page',
+      'GET /api/pages': 'List all pages',
+      'GET /api/pages/:pageId': 'Get page info',
+      'GET /api/apps': 'Deploy full application',
+      'GET /app/:appId': 'View deployed app',
+      'GET /:pageId': 'View landing page'
+    },
+    docs: 'See README.md for detailed usage'
+  });
+});
+
+// Serve landing pages (catch-all for page IDs)
 app.get('/:pageId', (req, res) => {
   const { pageId } = req.params;
   const page = pages.get(pageId);
@@ -314,21 +331,6 @@ app.get('/:pageId', (req, res) => {
   res.render(templateName, {
     page,
     pageUrl: `${req.protocol}://${req.get('host')}${req.originalUrl}`
-  });
-});
-
-
-// Default route
-app.get('/', (req, res) => {
-  res.json({
-    message: 'Landing Page API',
-    endpoints: {
-      'POST /api/pages': 'Create a new landing page',
-      'GET /api/pages': 'List all pages',
-      'GET /api/pages/:pageId': 'Get page info',
-      'GET /:pageId': 'View landing page'
-    },
-    docs: 'See README.md for detailed usage'
   });
 });
 
