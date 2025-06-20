@@ -97,7 +97,7 @@ app.get('/api/apps/:appId', (req, res) => {
 });
 
 // Serve app files (handle nested paths)
-app.get('/app/:appId/*?', (req, res) => {
+app.get('/app/:appId/*', (req, res) => {
   const { appId } = req.params;
   const app = apps.get(appId);
 
@@ -110,12 +110,12 @@ app.get('/app/:appId/*?', (req, res) => {
   apps.set(appId, app);
 
   // Get the filename from the wildcard path
-  const filename = req.params[0] || app.mainFile;
+  const filename = req.params[0];
   const requestedFile = decodeURIComponent(filename);
   const fileContent = app.files[requestedFile];
 
   if (!fileContent) {
-    return res.status(404).send('File not found');
+    return res.status(404).send(`File not found: ${requestedFile}`);
   }
 
   // Set appropriate content type
@@ -145,6 +145,61 @@ app.get('/app/:appId/*?', (req, res) => {
   } else if (contentType.startsWith('image/') && fileContent.startsWith('data:')) {
     // Handle base64 images
     const base64Data = fileContent.split(',')[1];
+    const buffer = Buffer.from(base64Data, 'base64');
+    res.send(buffer);
+  } else {
+    res.send(fileContent);
+  }
+});
+
+// Serve main app file (no filename)
+app.get('/app/:appId', (req, res) => {
+  const { appId } = req.params;
+  const app = apps.get(appId);
+
+  if (!app) {
+    return res.status(404).send('App not found');
+  }
+
+  // Increment view count
+  app.views = (app.views || 0) + 1;
+  apps.set(appId, app);
+
+  // Serve main file
+  const requestedFile = app.mainFile;
+  const fileContent = app.files[requestedFile];
+
+  if (!fileContent) {
+    return res.status(404).send('File not found');
+  }
+
+  // Set appropriate content type  
+  const ext = path.extname(requestedFile).toLowerCase();
+  const contentTypes = {
+    '.html': 'text/html',
+    '.css': 'text/css', 
+    '.js': 'application/javascript',
+    '.json': 'application/json',
+    '.png': 'image/png',
+    '.jpg': 'image/jpeg',
+    '.jpeg': 'image/jpeg', 
+    '.gif': 'image/gif',
+    '.svg': 'image/svg+xml'
+  };
+
+  const contentType = contentTypes[ext] || 'text/plain';
+  res.setHeader('Content-Type', contentType);
+
+  // For HTML files, rewrite relative URLs to include the app path
+  if (ext === '.html') {
+    const updatedContent = fileContent.replace(
+      /(href|src)="(?!http|\/\/|#|data:)([^"]+)"/g, 
+      `$1="/app/${appId}/$2"`
+    );
+    res.send(updatedContent);
+  } else if (contentType.startsWith('image/') && fileContent.startsWith('data:')) {
+    // Handle base64 images
+    const base64Data = fileContent.split(',')[1]; 
     const buffer = Buffer.from(base64Data, 'base64');
     res.send(buffer);
   } else {
