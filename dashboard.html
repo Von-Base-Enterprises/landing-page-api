@@ -514,147 +514,160 @@
         
         // Get Todo App HTML
         function getTodoAppHTML() {
-            return '<!DOCTYPE html>' +
-'<html lang="en">' +
-'<head>' +
-'    <meta charset="UTF-8">' +
-'    <meta name="viewport" content="width=device-width, initial-scale=1.0">' +
-'    <title>Todo App</title>' +
-'    <style>' +
-'        body { font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 2rem; }' +
-'        .todo-input { width: 70%; padding: 0.5rem; margin-right: 0.5rem; }' +
-'        .add-btn { padding: 0.5rem 1rem; background: #007bff; color: white; border: none; cursor: pointer; }' +
-'        .todo-item { padding: 0.5rem; margin: 0.5rem 0; background: #f5f5f5; border-radius: 4px; }' +
-'        .todo-item.done { text-decoration: line-through; opacity: 0.6; }' +
-'        h1 { color: #333; text-align: center; }' +
-'    </style>' +
-'</head>' +
-'<body>' +
-'    <h1>📝 My Todo App</h1>' +
-'    <div>' +
-'        <input type="text" id="todoInput" class="todo-input" placeholder="Add a new task...">' +
-'        <button onclick="addTodo()" class="add-btn">Add</button>' +
-'    </div>' +
-'    <div id="todoList"></div>' +
-'    <script>' +
-'        let todos = JSON.parse(localStorage.getItem("todos") || "[]");' +
-'        function renderTodos() {' +
-'            const list = document.getElementById("todoList");' +
-'            list.innerHTML = todos.map((todo, index) => ' +
-'                "<div class=\\"todo-item " + (todo.done ? "done" : "") + "\\">" +' +
-'                    "<input type=\\"checkbox\\" " + (todo.done ? "checked" : "") + " onchange=\\"toggleTodo(" + index + ")\\">" +' +
-'                    todo.text +' +
-'                    "<button onclick=\\"deleteTodo(" + index + ")\\" style=\\"float: right; background: #dc3545; color: white; border: none; padding: 0.25rem 0.5rem;\\">Delete</button>" +' +
-'                "</div>"' +
-'            ).join("");' +
-'        }' +
-'        function addTodo() {' +
-'            const input = document.getElementById("todoInput");' +
-'            if (input.value.trim()) {' +
-'                todos.push({ text: input.value.trim(), done: false });' +
-'                input.value = "";' +
-'                saveTodos();' +
-'                renderTodos();' +
-'            }' +
-'        }' +
-'        function toggleTodo(index) {' +
-'            todos[index].done = !todos[index].done;' +
-'            saveTodos();' +
-'            renderTodos();' +
-'        }' +
-'        function deleteTodo(index) {' +
-'            todos.splice(index, 1);' +
-'            saveTodos();' +
-'            renderTodos();' +
-'        }' +
-'        function saveTodos() {' +
-'            localStorage.setItem("todos", JSON.stringify(todos));' +
-'        }' +
-'        document.getElementById("todoInput").addEventListener("keypress", function(e) {' +
-'            if (e.key === "Enter") addTodo();' +
-'        });' +
-'        renderTodos();' +
-'    </script>' +
-'</body>' +
-'</html>';
+            const todoHtml = `<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Todo App</title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 2rem; }
+        .todo-input { width: 70%; padding: 0.5rem; margin-right: 0.5rem; }
+        .add-btn { padding: 0.5rem 1rem; background: #007bff; color: white; border: none; cursor: pointer; }
+        .todo-item { padding: 0.5rem; margin: 0.5rem 0; background: #f5f5f5; border-radius: 4px; }
+        .todo-item.done { text-decoration: line-through; opacity: 0.6; }
+        h1 { color: #333; text-align: center; }
+    </style>
+</head>
+<body>
+    <h1>📝 My Todo App</h1>
+    <div>
+        <input type="text" id="todoInput" class="todo-input" placeholder="Add a new task...">
+        <button onclick="addTodo()" class="add-btn">Add</button>
+    </div>
+    <div id="todoList"></div>
+    <script>
+        let todos = JSON.parse(localStorage.getItem('todos') || '[]');
+        
+        function renderTodos() {
+            const list = document.getElementById('todoList');
+            list.innerHTML = todos.map((todo, index) => 
+                \`<div class="todo-item \${todo.done ? 'done' : ''}">
+                    <input type="checkbox" \${todo.done ? 'checked' : ''} onchange="toggleTodo(\${index})">
+                    \${todo.text}
+                    <button onclick="deleteTodo(\${index})" style="float: right; background: #dc3545; color: white; border: none; padding: 0.25rem 0.5rem;">Delete</button>
+                </div>\`
+            ).join('');
+        }
+        
+        function addTodo() {
+            const input = document.getElementById('todoInput');
+            if (input.value.trim()) {
+                todos.push({ text: input.value.trim(), done: false });
+                input.value = '';
+                saveTodos();
+                renderTodos();
+            }
+        }
+        
+        function toggleTodo(index) {
+            todos[index].done = !todos[index].done;
+            saveTodos();
+            renderTodos();
+        }
+        
+        function deleteTodo(index) {
+            todos.splice(index, 1);
+            saveTodos();
+            renderTodos();
+        }
+        
+        function saveTodos() {
+            localStorage.setItem('todos', JSON.stringify(todos));
+        }
+        
+        document.getElementById('todoInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') addTodo();
+        });
+        
+        renderTodos();
+    </script>
+</body>
+</html>`;
+            return todoHtml;
         }
         
         // Get Calculator App HTML
         function getCalculatorAppHTML() {
-            return '<!DOCTYPE html>' +
-'<html lang="en">' +
-'<head>' +
-'    <meta charset="UTF-8">' +
-'    <meta name="viewport" content="width=device-width, initial-scale=1.0">' +
-'    <title>Calculator App</title>' +
-'    <style>' +
-'        body { font-family: Arial, sans-serif; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; background: #f0f0f0; }' +
-'        .calculator { background: white; border-radius: 10px; padding: 20px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }' +
-'        .display { width: 100%; height: 60px; font-size: 24px; text-align: right; margin-bottom: 10px; padding: 0 10px; border: 1px solid #ddd; }' +
-'        .buttons { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }' +
-'        button { height: 50px; font-size: 18px; border: none; border-radius: 5px; cursor: pointer; }' +
-'        .number { background: #e9ecef; }' +
-'        .operator { background: #007bff; color: white; }' +
-'        .equals { background: #28a745; color: white; }' +
-'        .clear { background: #dc3545; color: white; }' +
-'        h1 { text-align: center; margin-bottom: 20px; color: #333; }' +
-'    </style>' +
-'</head>' +
-'<body>' +
-'    <div class="calculator">' +
-'        <h1>🧮 Calculator</h1>' +
-'        <input type="text" id="display" class="display" readonly>' +
-'        <div class="buttons">' +
-'            <button onclick="clearDisplay()" class="clear">C</button>' +
-'            <button onclick="appendToDisplay(\'/\')" class="operator">÷</button>' +
-'            <button onclick="appendToDisplay(\'*\')" class="operator">×</button>' +
-'            <button onclick="deleteLast()" class="operator">⌫</button>' +
-'            <button onclick="appendToDisplay(\'7\')" class="number">7</button>' +
-'            <button onclick="appendToDisplay(\'8\')" class="number">8</button>' +
-'            <button onclick="appendToDisplay(\'9\')" class="number">9</button>' +
-'            <button onclick="appendToDisplay(\'-\')" class="operator">-</button>' +
-'            <button onclick="appendToDisplay(\'4\')" class="number">4</button>' +
-'            <button onclick="appendToDisplay(\'5\')" class="number">5</button>' +
-'            <button onclick="appendToDisplay(\'6\')" class="number">6</button>' +
-'            <button onclick="appendToDisplay(\'+\')" class="operator">+</button>' +
-'            <button onclick="appendToDisplay(\'1\')" class="number">1</button>' +
-'            <button onclick="appendToDisplay(\'2\')" class="number">2</button>' +
-'            <button onclick="appendToDisplay(\'3\')" class="number">3</button>' +
-'            <button onclick="calculate()" class="equals">=</button>' +
-'            <button onclick="appendToDisplay(\'0\')" class="number" style="grid-column: span 2;">0</button>' +
-'            <button onclick="appendToDisplay(\'.\')" class="number">.</button>' +
-'        </div>' +
-'    </div>' +
-'    <script>' +
-'        function appendToDisplay(value) {' +
-'            const display = document.getElementById("display");' +
-'            if (display.value === "0" && value !== ".") {' +
-'                display.value = value;' +
-'            } else {' +
-'                display.value += value;' +
-'            }' +
-'        }' +
-'        function clearDisplay() {' +
-'            document.getElementById("display").value = "0";' +
-'        }' +
-'        function deleteLast() {' +
-'            const display = document.getElementById("display");' +
-'            display.value = display.value.slice(0, -1) || "0";' +
-'        }' +
-'        function calculate() {' +
-'            const display = document.getElementById("display");' +
-'            try {' +
-'                let expression = display.value.replace(/×/g, "*").replace(/÷/g, "/");' +
-'                display.value = eval(expression);' +
-'            } catch (error) {' +
-'                display.value = "Error";' +
-'                setTimeout(() => clearDisplay(), 1500);' +
-'            }' +
-'        }' +
-'        clearDisplay();' +
-'    </script>' +
-'</body>' +
-'</html>';
+            const calcHtml = `<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calculator App</title>
+    <style>
+        body { font-family: Arial, sans-serif; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; background: #f0f0f0; }
+        .calculator { background: white; border-radius: 10px; padding: 20px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        .display { width: 100%; height: 60px; font-size: 24px; text-align: right; margin-bottom: 10px; padding: 0 10px; border: 1px solid #ddd; }
+        .buttons { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
+        button { height: 50px; font-size: 18px; border: none; border-radius: 5px; cursor: pointer; }
+        .number { background: #e9ecef; }
+        .operator { background: #007bff; color: white; }
+        .equals { background: #28a745; color: white; }
+        .clear { background: #dc3545; color: white; }
+        h1 { text-align: center; margin-bottom: 20px; color: #333; }
+    </style>
+</head>
+<body>
+    <div class="calculator">
+        <h1>🧮 Calculator</h1>
+        <input type="text" id="display" class="display" readonly>
+        <div class="buttons">
+            <button onclick="clearDisplay()" class="clear">C</button>
+            <button onclick="appendToDisplay('/')" class="operator">÷</button>
+            <button onclick="appendToDisplay('*')" class="operator">×</button>
+            <button onclick="deleteLast()" class="operator">⌫</button>
+            <button onclick="appendToDisplay('7')" class="number">7</button>
+            <button onclick="appendToDisplay('8')" class="number">8</button>
+            <button onclick="appendToDisplay('9')" class="number">9</button>
+            <button onclick="appendToDisplay('-')" class="operator">-</button>
+            <button onclick="appendToDisplay('4')" class="number">4</button>
+            <button onclick="appendToDisplay('5')" class="number">5</button>
+            <button onclick="appendToDisplay('6')" class="number">6</button>
+            <button onclick="appendToDisplay('+')" class="operator">+</button>
+            <button onclick="appendToDisplay('1')" class="number">1</button>
+            <button onclick="appendToDisplay('2')" class="number">2</button>
+            <button onclick="appendToDisplay('3')" class="number">3</button>
+            <button onclick="calculate()" class="equals">=</button>
+            <button onclick="appendToDisplay('0')" class="number" style="grid-column: span 2;">0</button>
+            <button onclick="appendToDisplay('.')" class="number">.</button>
+        </div>
+    </div>
+    <script>
+        function appendToDisplay(value) {
+            const display = document.getElementById('display');
+            if (display.value === '0' && value !== '.') {
+                display.value = value;
+            } else {
+                display.value += value;
+            }
+        }
+        
+        function clearDisplay() {
+            document.getElementById('display').value = '0';
+        }
+        
+        function deleteLast() {
+            const display = document.getElementById('display');
+            display.value = display.value.slice(0, -1) || '0';
+        }
+        
+        function calculate() {
+            const display = document.getElementById('display');
+            try {
+                let expression = display.value.replace(/×/g, '*').replace(/÷/g, '/');
+                display.value = eval(expression);
+            } catch (error) {
+                display.value = 'Error';
+                setTimeout(() => clearDisplay(), 1500);
+            }
+        }
+        
+        clearDisplay();
+    </script>
+</body>
+</html>`;
+            return calcHtml;
         }
     </script>
 </body>
