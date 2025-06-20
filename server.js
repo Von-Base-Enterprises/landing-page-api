@@ -58,7 +58,9 @@ app.get('/api/apps', (req, res) => {
     title: app.title,
     createdAt: app.createdAt,
     views: app.views,
-    miniPaasType: app.miniPaasType || 'custom'
+    miniPaasType: app.miniPaasType || 'custom',
+    description: app.description || '',
+    stack: app.stack || []
   }));
 
   res.json({
@@ -75,7 +77,9 @@ app.post('/api/apps', async (req, res) => {
       title = 'My App',
       files = {},
       mainFile = 'index.html',
-      miniPaasType = 'custom'
+      miniPaasType = 'custom',
+      description = '',
+      stack = []
     } = req.body;
 
     const appId = uuidv4();
@@ -85,6 +89,8 @@ app.post('/api/apps', async (req, res) => {
       files,
       mainFile,
       miniPaasType,
+      description,
+      stack,
       createdAt: new Date().toISOString(),
       views: 0
     };
@@ -126,7 +132,10 @@ app.get('/api/apps/:appId', (req, res) => {
       title: app.title, 
       mainFile: app.mainFile,
       createdAt: app.createdAt,
-      views: app.views 
+      views: app.views,
+      miniPaasType: app.miniPaasType || 'custom',
+      description: app.description || '',
+      stack: app.stack || []
     }
   });
 });
