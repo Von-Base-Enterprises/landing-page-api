@@ -3,8 +3,34 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mini-PaaS Dashboard</title>
+    <title>CloudForge - Mini PaaS Platform</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/lucide@latest/dist/umd/lucide.js" rel="stylesheet">
     <style>
+        :root {
+            --primary: #3B82F6;
+            --primary-dark: #1D4ED8;
+            --primary-light: #DBEAFE;
+            --secondary: #8B5CF6;
+            --success: #10B981;
+            --warning: #F59E0B;
+            --danger: #EF4444;
+            --gray-50: #F9FAFB;
+            --gray-100: #F3F4F6;
+            --gray-200: #E5E7EB;
+            --gray-300: #D1D5DB;
+            --gray-400: #9CA3AF;
+            --gray-500: #6B7280;
+            --gray-600: #4B5563;
+            --gray-700: #374151;
+            --gray-800: #1F2937;
+            --gray-900: #111827;
+            --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+            --shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
+            --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+            --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+        }
+        
         * {
             margin: 0;
             padding: 0;
@@ -12,112 +38,351 @@
         }
         
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
-            color: #333;
+            color: var(--gray-900);
+            line-height: 1.5;
+        }
+        
+        .main-container {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .top-nav {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 1rem 2rem;
+        }
+        
+        .nav-content {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            color: white;
+            font-weight: 700;
+            font-size: 1.25rem;
+        }
+        
+        .nav-actions {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+        }
+        
+        .nav-btn {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.875rem;
+            font-weight: 500;
+            transition: all 0.2s ease;
+        }
+        
+        .nav-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
         }
         
         .container {
-            max-width: 1200px;
+            max-width: 1400px;
             margin: 0 auto;
             padding: 2rem;
+            flex: 1;
         }
         
-        .header {
-            text-align: center;
-            color: white;
-            margin-bottom: 3rem;
-        }
-        
-        .header h1 {
-            font-size: 3rem;
-            margin-bottom: 0.5rem;
-            font-weight: 700;
-        }
-        
-        .header p {
-            font-size: 1.2rem;
-            opacity: 0.9;
-        }
-        
-        .dashboard {
-            background: white;
-            border-radius: 20px;
-            padding: 2rem;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+        .page-header {
             margin-bottom: 2rem;
         }
         
-        .create-section {
-            text-align: center;
-            padding: 2rem;
-            border: 2px dashed #ddd;
-            border-radius: 15px;
-            margin-bottom: 3rem;
-        }
-        
-        .create-btn {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        .page-title {
             color: white;
-            border: none;
-            padding: 1rem 2rem;
-            font-size: 1.1rem;
-            border-radius: 50px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
-            margin: 0.5rem;
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
         }
         
-        .create-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6);
+        .page-subtitle {
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 1.125rem;
         }
         
-        .create-btn:disabled {
-            opacity: 0.6;
-            cursor: not-allowed;
+        .dashboard-grid {
+            display: grid;
+            gap: 2rem;
+            grid-template-columns: 1fr;
         }
         
-        .apps-section h2 {
+        .stats-section {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+        
+        .stat-card {
+            background: white;
+            border-radius: 16px;
+            padding: 1.5rem;
+            box-shadow: var(--shadow-lg);
+            border: 1px solid var(--gray-200);
+        }
+        
+        .stat-header {
+            display: flex;
+            justify-content: between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+        
+        .stat-icon {
+            width: 2.5rem;
+            height: 2.5rem;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.25rem;
+        }
+        
+        .stat-icon.primary { background: var(--primary-light); color: var(--primary); }
+        .stat-icon.success { background: #ECFDF5; color: var(--success); }
+        .stat-icon.warning { background: #FFFBEB; color: var(--warning); }
+        .stat-icon.secondary { background: #F3E8FF; color: var(--secondary); }
+        
+        .stat-number {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--gray-900);
+            margin-bottom: 0.25rem;
+        }
+        
+        .stat-label {
+            color: var(--gray-500);
+            font-size: 0.875rem;
+            font-weight: 500;
+        }
+        
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 2fr;
+            gap: 2rem;
+        }
+        
+        .sidebar {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+        
+        .card {
+            background: white;
+            border-radius: 16px;
+            padding: 1.5rem;
+            box-shadow: var(--shadow-lg);
+            border: 1px solid var(--gray-200);
+        }
+        
+        .card-header {
             margin-bottom: 1.5rem;
-            color: #333;
-            border-bottom: 2px solid #eee;
-            padding-bottom: 0.5rem;
+        }
+        
+        .card-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: var(--gray-900);
+            margin-bottom: 0.5rem;
+        }
+        
+        .card-subtitle {
+            color: var(--gray-500);
+            font-size: 0.875rem;
+        }
+        
+        .template-grid {
+            display: grid;
+            gap: 1rem;
+        }
+        
+        .template-card {
+            border: 2px solid var(--gray-200);
+            border-radius: 12px;
+            padding: 1rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            background: var(--gray-50);
+        }
+        
+        .template-card:hover {
+            border-color: var(--primary);
+            background: white;
+            box-shadow: var(--shadow);
+        }
+        
+        .template-card.selected {
+            border-color: var(--primary);
+            background: var(--primary-light);
+        }
+        
+        .template-header {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        .template-icon {
+            font-size: 1.5rem;
+        }
+        
+        .template-name {
+            font-weight: 600;
+            color: var(--gray-900);
+        }
+        
+        .template-description {
+            color: var(--gray-600);
+            font-size: 0.875rem;
+            line-height: 1.4;
+        }
+        
+        .template-stack {
+            display: flex;
+            gap: 0.5rem;
+            margin-top: 0.75rem;
+            flex-wrap: wrap;
+        }
+        
+        .stack-badge {
+            background: var(--gray-200);
+            color: var(--gray-700);
+            font-size: 0.75rem;
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            font-weight: 500;
+        }
+        
+        .btn {
+            border: none;
+            border-radius: 8px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            text-decoration: none;
+        }
+        
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+            padding: 0.75rem 1.5rem;
+        }
+        
+        .btn-primary:hover {
+            background: var(--primary-dark);
+        }
+        
+        .btn-secondary {
+            background: var(--gray-100);
+            color: var(--gray-700);
+            padding: 0.5rem 1rem;
+        }
+        
+        .btn-secondary:hover {
+            background: var(--gray-200);
+        }
+        
+        .btn-danger {
+            background: var(--danger);
+            color: white;
+            padding: 0.5rem 1rem;
+        }
+        
+        .btn-danger:hover {
+            background: #DC2626;
+        }
+        
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
         }
         
         .apps-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
             gap: 1.5rem;
         }
         
         .app-card {
-            background: #f8f9fa;
-            border-radius: 15px;
+            background: white;
+            border-radius: 16px;
             padding: 1.5rem;
-            border: 1px solid #eee;
-            transition: all 0.3s ease;
+            box-shadow: var(--shadow);
+            border: 1px solid var(--gray-200);
+            transition: all 0.2s ease;
         }
         
         .app-card:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+            box-shadow: var(--shadow-lg);
+            transform: translateY(-1px);
+        }
+        
+        .app-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 1rem;
+        }
+        
+        .app-info {
+            flex: 1;
         }
         
         .app-title {
-            font-size: 1.2rem;
+            font-size: 1.125rem;
             font-weight: 600;
-            margin-bottom: 0.5rem;
-            color: #333;
+            color: var(--gray-900);
+            margin-bottom: 0.25rem;
         }
         
-        .app-id {
-            font-size: 0.9rem;
-            color: #666;
-            margin-bottom: 1rem;
-            font-family: monospace;
+        .app-meta {
+            color: var(--gray-500);
+            font-size: 0.875rem;
+        }
+        
+        .app-status {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin: 1rem 0;
+        }
+        
+        .status-indicator {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--success);
+        }
+        
+        .status-text {
+            color: var(--gray-600);
+            font-size: 0.875rem;
         }
         
         .app-actions {
@@ -126,86 +391,66 @@
             flex-wrap: wrap;
         }
         
-        .open-btn {
-            background: #28a745;
-            color: white;
-            border: none;
-            padding: 0.5rem 1rem;
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: 0.9rem;
-            transition: all 0.3s ease;
-            text-decoration: none;
-            display: inline-block;
-        }
-        
-        .open-btn:hover {
-            background: #218838;
-            text-decoration: none;
-            color: white;
-        }
-        
-        .delete-btn {
-            background: #dc3545;
-            color: white;
-            border: none;
-            padding: 0.5rem 1rem;
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: 0.9rem;
-            transition: all 0.3s ease;
-        }
-        
-        .delete-btn:hover {
-            background: #c82333;
-        }
-        
         .empty-state {
             text-align: center;
             padding: 3rem 1rem;
-            color: #666;
+            color: var(--gray-500);
         }
         
-        .empty-state h3 {
+        .empty-icon {
+            font-size: 3rem;
             margin-bottom: 1rem;
-            color: #888;
-        }
-        
-        .loading {
-            display: inline-block;
-            margin-left: 0.5rem;
+            opacity: 0.5;
         }
         
         .spinner {
-            display: inline-block;
             width: 16px;
             height: 16px;
-            border: 2px solid #ffffff;
+            border: 2px solid currentColor;
             border-radius: 50%;
             border-top-color: transparent;
-            animation: spin 1s ease-in-out infinite;
+            animation: spin 1s linear infinite;
         }
         
         @keyframes spin {
             to { transform: rotate(360deg); }
         }
         
-        .success-message {
-            background: #d4edda;
-            color: #155724;
+        .alert {
             padding: 1rem;
             border-radius: 8px;
             margin-bottom: 1rem;
-            border: 1px solid #c3e6cb;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
         }
         
-        .error-message {
-            background: #f8d7da;
-            color: #721c24;
-            padding: 1rem;
-            border-radius: 8px;
-            margin-bottom: 1rem;
-            border: 1px solid #f5c6cb;
+        .alert-success {
+            background: #ECFDF5;
+            color: #065F46;
+            border: 1px solid #A7F3D0;
+        }
+        
+        .alert-error {
+            background: #FEF2F2;
+            color: #991B1B;
+            border: 1px solid #FECACA;
+        }
+        
+        .alert-info {
+            background: #EFF6FF;
+            color: #1E40AF;
+            border: 1px solid #BFDBFE;
+        }
+        
+        @media (max-width: 1024px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+            
+            .nav-content {
+                padding: 0 1rem;
+            }
         }
         
         @media (max-width: 768px) {
@@ -213,95 +458,193 @@
                 padding: 1rem;
             }
             
-            .header h1 {
+            .page-title {
                 font-size: 2rem;
             }
             
-            .dashboard {
-                padding: 1.5rem;
+            .stats-section {
+                grid-template-columns: 1fr;
             }
             
             .apps-grid {
                 grid-template-columns: 1fr;
             }
-        }
-        
-        .stats {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 1rem;
-            margin-bottom: 2rem;
-        }
-        
-        .stat-card {
-            background: #f8f9fa;
-            border-radius: 10px;
-            padding: 1.5rem;
-            text-align: center;
-            border: 1px solid #eee;
-        }
-        
-        .stat-number {
-            font-size: 2rem;
-            font-weight: bold;
-            color: #667eea;
-        }
-        
-        .stat-label {
-            color: #666;
-            font-size: 0.9rem;
-            margin-top: 0.5rem;
+            
+            .nav-actions {
+                display: none;
+            }
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <div class="header">
-            <h1>🚀 Mini-PaaS Dashboard</h1>
-            <p>Create and manage your lightweight applications</p>
-        </div>
+    <div class="main-container">
+        <nav class="top-nav">
+            <div class="nav-content">
+                <div class="logo">
+                    <span>⚡</span>
+                    CloudForge
+                </div>
+                <div class="nav-actions">
+                    <button class="nav-btn" onclick="showDocs()">📚 Docs</button>
+                    <button class="nav-btn" onclick="showSettings()">⚙️ Settings</button>
+                </div>
+            </div>
+        </nav>
         
-        <div class="dashboard">
-            <div class="stats">
+        <div class="container">
+            <div class="page-header">
+                <h1 class="page-title">Platform Dashboard</h1>
+                <p class="page-subtitle">Deploy and manage your applications with ease</p>
+            </div>
+            
+            <div class="stats-section">
                 <div class="stat-card">
+                    <div class="stat-header">
+                        <div class="stat-icon primary">🚀</div>
+                    </div>
                     <div class="stat-number" id="totalApps">0</div>
-                    <div class="stat-label">Total Apps</div>
+                    <div class="stat-label">Active Applications</div>
                 </div>
                 <div class="stat-card">
-                    <div class="stat-number" id="totalPages">0</div>
-                    <div class="stat-label">Landing Pages</div>
-                </div>
-                <div class="stat-card">
+                    <div class="stat-header">
+                        <div class="stat-icon success">📊</div>
+                    </div>
                     <div class="stat-number" id="totalViews">0</div>
                     <div class="stat-label">Total Views</div>
                 </div>
-            </div>
-            
-            <div class="create-section">
-                <h2>🎯 Quick Deploy</h2>
-                <p style="margin-bottom: 1.5rem; color: #666;">Create applications instantly</p>
-                <button class="create-btn" onclick="createTodoApp()">
-                    📝 Create Todo App
-                    <span class="loading" id="createTodoLoading" style="display: none;">
-                        <span class="spinner"></span>
-                    </span>
-                </button>
-                <button class="create-btn" onclick="createCalculatorApp()">
-                    🧮 Create Calculator
-                    <span class="loading" id="createCalcLoading" style="display: none;">
-                        <span class="spinner"></span>
-                    </span>
-                </button>
+                <div class="stat-card">
+                    <div class="stat-header">
+                        <div class="stat-icon warning">⏱️</div>
+                    </div>
+                    <div class="stat-number" id="uptime">99.9%</div>
+                    <div class="stat-label">Platform Uptime</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-header">
+                        <div class="stat-icon secondary">💾</div>
+                    </div>
+                    <div class="stat-number" id="storage">2.1GB</div>
+                    <div class="stat-label">Storage Used</div>
+                </div>
             </div>
             
             <div id="messages"></div>
             
-            <div class="apps-section">
-                <h2>📱 Your Applications</h2>
-                <div class="apps-grid" id="appsGrid">
-                    <div class="empty-state">
-                        <h3>No apps yet</h3>
-                        <p>Create your first app to get started!</p>
+            <div class="main-content">
+                <div class="sidebar">
+                    <div class="card">
+                        <div class="card-header">
+                            <h2 class="card-title">Quick Deploy</h2>
+                            <p class="card-subtitle">Choose a template to get started</p>
+                        </div>
+                        
+                        <div class="template-grid">
+                            <div class="template-card" onclick="selectTemplate('react')">
+                                <div class="template-header">
+                                    <span class="template-icon">⚛️</span>
+                                    <span class="template-name">React App</span>
+                                </div>
+                                <p class="template-description">Modern React application with hooks, routing, and state management</p>
+                                <div class="template-stack">
+                                    <span class="stack-badge">React 18</span>
+                                    <span class="stack-badge">Vite</span>
+                                    <span class="stack-badge">TypeScript</span>
+                                </div>
+                            </div>
+                            
+                            <div class="template-card" onclick="selectTemplate('vue')">
+                                <div class="template-header">
+                                    <span class="template-icon">💚</span>
+                                    <span class="template-name">Vue App</span>
+                                </div>
+                                <p class="template-description">Progressive Vue.js application with composition API</p>
+                                <div class="template-stack">
+                                    <span class="stack-badge">Vue 3</span>
+                                    <span class="stack-badge">Vite</span>
+                                    <span class="stack-badge">Pinia</span>
+                                </div>
+                            </div>
+                            
+                            <div class="template-card" onclick="selectTemplate('node')">
+                                <div class="template-header">
+                                    <span class="template-icon">🟢</span>
+                                    <span class="template-name">Node API</span>
+                                </div>
+                                <p class="template-description">RESTful API with Express.js and database integration</p>
+                                <div class="template-stack">
+                                    <span class="stack-badge">Express</span>
+                                    <span class="stack-badge">MongoDB</span>
+                                    <span class="stack-badge">JWT</span>
+                                </div>
+                            </div>
+                            
+                            <div class="template-card" onclick="selectTemplate('static')">
+                                <div class="template-header">
+                                    <span class="template-icon">🌐</span>
+                                    <span class="template-name">Static Site</span>
+                                </div>
+                                <p class="template-description">Fast static website with modern build tools</p>
+                                <div class="template-stack">
+                                    <span class="stack-badge">HTML5</span>
+                                    <span class="stack-badge">CSS3</span>
+                                    <span class="stack-badge">Vanilla JS</span>
+                                </div>
+                            </div>
+                            
+                            <div class="template-card" onclick="selectTemplate('todo')">
+                                <div class="template-header">
+                                    <span class="template-icon">✅</span>
+                                    <span class="template-name">Todo App</span>
+                                </div>
+                                <p class="template-description">Simple task management application</p>
+                                <div class="template-stack">
+                                    <span class="stack-badge">HTML</span>
+                                    <span class="stack-badge">CSS</span>
+                                    <span class="stack-badge">JavaScript</span>
+                                </div>
+                            </div>
+                            
+                            <div class="template-card" onclick="selectTemplate('calculator')">
+                                <div class="template-header">
+                                    <span class="template-icon">🧮</span>
+                                    <span class="template-name">Calculator</span>
+                                </div>
+                                <p class="template-description">Interactive calculator with scientific functions</p>
+                                <div class="template-stack">
+                                    <span class="stack-badge">HTML</span>
+                                    <span class="stack-badge">CSS</span>
+                                    <span class="stack-badge">JavaScript</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div style="margin-top: 1.5rem; display: flex; gap: 0.75rem;">
+                            <button class="btn btn-primary" onclick="deploySelectedTemplate()" id="deployBtn" disabled>
+                                <span id="deployIcon">🚀</span>
+                                <span id="deployText">Deploy App</span>
+                                <div class="spinner" id="deploySpinner" style="display: none;"></div>
+                            </button>
+                            <button class="btn btn-secondary" onclick="customDeploy()">
+                                ⚙️ Custom Deploy
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="main-section">
+                    <div class="card">
+                        <div class="card-header">
+                            <h2 class="card-title">Your Applications</h2>
+                            <p class="card-subtitle">Manage and monitor your deployed apps</p>
+                        </div>
+                        
+                        <div class="apps-grid" id="appsGrid">
+                            <div class="empty-state">
+                                <div class="empty-icon">📱</div>
+                                <h3>No applications yet</h3>
+                                <p>Deploy your first app to get started with CloudForge</p>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -312,6 +655,7 @@
         // State management
         let apps = [];
         let pages = [];
+        let selectedTemplate = null;
         
         // Initialize dashboard
         document.addEventListener('DOMContentLoaded', function() {
