@@ -14,8 +14,8 @@ const PORT = process.env.PORT || 3000;
 app.use(helmet());
 app.use(cors());
 app.use(morgan('combined'));
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+app.use(express.json({ limit: '10mb' }));
+app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
 // Set EJS as template engine
 app.set('view engine', 'ejs');
@@ -26,6 +26,7 @@ app.use('/assets', express.static(path.join(__dirname, 'assets')));
 
 // In-memory storage for pages (use database in production)
 const pages = new Map();
+const apps = new Map(); // Storage for full applications
 
 // Health check endpoint
 app.get('/health', (req, res) => {
@@ -33,6 +34,117 @@ app.get('/health', (req, res) => {
 });
 
 // API Routes
+
+// Deploy a full application
+app.post('/api/apps', async (req, res) => {
+  try {
+    const {
+      title = 'My App',
+      files = {},
+      mainFile = 'index.html'
+    } = req.body;
+
+    const appId = uuidv4();
+    const appData = {
+      id: appId,
+      title,
+      files,
+      mainFile,
+      createdAt: new Date().toISOString(),
+      views: 0
+    };
+
+    // Store app data
+    apps.set(appId, appData);
+
+    res.status(201).json({
+      success: true,
+      app: { id: appId, title, mainFile, createdAt: appData.createdAt },
+      url: `${req.protocol}://${req.get('host')}/app/${appId}`
+    });
+
+  } catch (error) {
+    console.error('Error deploying app:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Failed to deploy application'
+    });
+  }
+});
+
+// Get app info
+app.get('/api/apps/:appId', (req, res) => {
+  const { appId } = req.params;
+  const app = apps.get(appId);
+
+  if (!app) {
+    return res.status(404).json({
+      success: false,
+      error: 'App not found'
+    });
+  }
+
+  res.json({
+    success: true,
+    app: { 
+      id: app.id, 
+      title: app.title, 
+      mainFile: app.mainFile,
+      createdAt: app.createdAt,
+      views: app.views 
+    }
+  });
+});
+
+// Serve app files
+app.get('/app/:appId/:filename?', (req, res) => {
+  const { appId, filename } = req.params;
+  const app = apps.get(appId);
+
+  if (!app) {
+    return res.status(404).send('App not found');
+  }
+
+  // Increment view count
+  app.views = (app.views || 0) + 1;
+  apps.set(appId, app);
+
+  // Determine which file to serve
+  const requestedFile = filename || app.mainFile;
+  const fileContent = app.files[requestedFile];
+
+  if (!fileContent) {
+    return res.status(404).send('File not found');
+  }
+
+  // Set appropriate content type
+  const ext = path.extname(requestedFile).toLowerCase();
+  const contentTypes = {
+    '.html': 'text/html',
+    '.css': 'text/css',
+    '.js': 'application/javascript',
+    '.json': 'application/json',
+    '.png': 'image/png',
+    '.jpg': 'image/jpeg',
+    '.jpeg': 'image/jpeg',
+    '.gif': 'image/gif',
+    '.svg': 'image/svg+xml'
+  };
+
+  const contentType = contentTypes[ext] || 'text/plain';
+  res.setHeader('Content-Type', contentType);
+
+  // For HTML files, rewrite relative URLs to include the app path
+  if (ext === '.html') {
+    const updatedContent = fileContent.replace(
+      /(href|src)="(?!http|\/\/|#)([^"]+)"/g,
+      `$1="/app/${appId}/$2"`
+    );
+    res.send(updatedContent);
+  } else {
+    res.send(fileContent);
+  }
+});
 
 // Create a new landing page
 app.post('/api/pages', async (req, res) => {
