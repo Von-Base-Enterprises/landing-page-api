@@ -137,10 +137,15 @@ app.get('/app/:appId/:filename?', (req, res) => {
   // For HTML files, rewrite relative URLs to include the app path
   if (ext === '.html') {
     const updatedContent = fileContent.replace(
-      /(href|src)="(?!http|\/\/|#)([^"]+)"/g,
+      /(href|src)="(?!http|\/\/|#|data:)([^"]+)"/g,
       `$1="/app/${appId}/$2"`
     );
     res.send(updatedContent);
+  } else if (contentType.startsWith('image/') && fileContent.startsWith('data:')) {
+    // Handle base64 images
+    const base64Data = fileContent.split(',')[1];
+    const buffer = Buffer.from(base64Data, 'base64');
+    res.send(buffer);
   } else {
     res.send(fileContent);
   }
