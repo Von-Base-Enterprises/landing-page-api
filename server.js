@@ -96,9 +96,9 @@ app.get('/api/apps/:appId', (req, res) => {
   });
 });
 
-// Serve app files
-app.get('/app/:appId/:filename?', (req, res) => {
-  const { appId, filename } = req.params;
+// Serve app files (handle nested paths)
+app.get('/app/:appId/*?', (req, res) => {
+  const { appId } = req.params;
   const app = apps.get(appId);
 
   if (!app) {
@@ -109,8 +109,9 @@ app.get('/app/:appId/:filename?', (req, res) => {
   app.views = (app.views || 0) + 1;
   apps.set(appId, app);
 
-  // Determine which file to serve
-  const requestedFile = filename || app.mainFile;
+  // Get the filename from the wildcard path
+  const filename = req.params[0] || app.mainFile;
+  const requestedFile = decodeURIComponent(filename);
   const fileContent = app.files[requestedFile];
 
   if (!fileContent) {
